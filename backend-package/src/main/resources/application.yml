@@ -1,0 +1,55 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+
+spring:
+  application:
+    name: hybrid-inventory
+  datasource:
+    url: jdbc:mysql://localhost:3306/inventory_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:root}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+
+  # Spring Mail Configuration (Credentials strictly via environment variables, never hardcoded)
+  mail:
+    host: ${SPRING_MAIL_HOST:${MAIL_HOST:}}
+    port: ${SPRING_MAIL_PORT:${MAIL_PORT:587}}
+    username: ${SPRING_MAIL_USERNAME:${MAIL_USERNAME:}}
+    password: ${SPRING_MAIL_PASSWORD:${MAIL_PASSWORD:}}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: false
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+
+ai:
+  service:
+    url: ${AI_SERVICE_URL:http://localhost:5000}
+
+# Inventory Low-Stock Alert System Configuration
+inventory:
+  alert:
+    email: ${ALERT_RECIPIENT_EMAIL:inventory-admin@example.com}
+    manager:
+      email: ${ALERT_MANAGER_EMAIL:store-manager@example.com}
+    cooldown-hours: ${ALERT_COOLDOWN_HOURS:24}
+    retry:
+      interval-ms: ${ALERT_RETRY_INTERVAL_MS:300000}
+    max-retries: ${ALERT_MAX_RETRIES:5}
+    worker:
+      delay: 30000
+  sqlite:
+    db-path: ${SQLITE_DB_PATH:alert_queue.db}

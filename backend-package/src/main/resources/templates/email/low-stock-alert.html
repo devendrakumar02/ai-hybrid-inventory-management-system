@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${isCritical ? 'CRITICAL STOCKOUT ALERT' : 'Low Stock Warning'}">Inventory Alert</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: #0f172a;
+            color: #f1f5f9;
+            -webkit-font-smoothing: antialiased;
+        }
+        .container {
+            max-width: 640px;
+            margin: 24px auto;
+            background: #1e293b;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.4);
+            border: 1px solid #334155;
+        }
+        .header {
+            padding: 32px 32px 24px 32px;
+            text-align: center;
+        }
+        .header-critical {
+            background: linear-gradient(135deg, #7f1d1d 0%, #dc2626 50%, #991b1b 100%);
+            border-bottom: 3px solid #ef4444;
+        }
+        .header-warning {
+            background: linear-gradient(135deg, #78350f 0%, #d97706 50%, #b45309 100%);
+            border-bottom: 3px solid #f59e0b;
+        }
+        .badge {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            padding: 6px 16px;
+            border-radius: 9999px;
+            margin-bottom: 12px;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 26px;
+            font-weight: 800;
+            color: #ffffff;
+            letter-spacing: -0.5px;
+        }
+        .header p {
+            margin: 8px 0 0 0;
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.9);
+        }
+        .content {
+            padding: 32px;
+        }
+        .summary-card {
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 12px;
+            padding: 20px 24px;
+            margin-bottom: 24px;
+            text-align: center;
+        }
+        .product-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #f8fafc;
+            margin-bottom: 4px;
+        }
+        .sku-tag {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 13px;
+            color: #94a3b8;
+        }
+        .metrics-grid {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-bottom: 24px;
+            border: 1px solid #334155;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .metrics-grid th, .metrics-grid td {
+            padding: 14px 18px;
+            text-align: left;
+            border-bottom: 1px solid #334155;
+        }
+        .metrics-grid tr:last-child th, .metrics-grid tr:last-child td {
+            border-bottom: none;
+        }
+        .metrics-grid th {
+            background: #1e293b;
+            color: #94a3b8;
+            font-size: 13px;
+            font-weight: 600;
+            width: 45%;
+        }
+        .metrics-grid td {
+            background: #0f172a;
+            color: #f1f5f9;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        .highlight-critical {
+            color: #f87171 !important;
+            font-size: 18px !important;
+            font-weight: 800 !important;
+        }
+        .highlight-warning {
+            color: #fbbf24 !important;
+            font-size: 18px !important;
+            font-weight: 800 !important;
+        }
+        .reorder-box {
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.15) 0%, rgba(59, 130, 246, 0.05) 100%);
+            border: 1px solid #3b82f6;
+            border-radius: 12px;
+            padding: 20px 24px;
+            margin-bottom: 24px;
+        }
+        .reorder-title {
+            color: #60a5fa;
+            font-size: 14px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+        .reorder-val {
+            font-size: 24px;
+            font-weight: 800;
+            color: #ffffff;
+            margin-bottom: 4px;
+        }
+        .reorder-note {
+            font-size: 13px;
+            color: #93c5fd;
+            margin: 0;
+            line-height: 1.5;
+        }
+        .footer {
+            background: #0f172a;
+            padding: 24px 32px;
+            border-top: 1px solid #334155;
+            text-align: center;
+            font-size: 12px;
+            color: #64748b;
+        }
+        .footer p {
+            margin: 4px 0;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <!-- Header with Dynamic State -->
+    <div th:class="${isCritical} ? 'header header-critical' : 'header header-warning'">
+        <div class="badge" th:text="${isCritical ? '🚨 CRITICAL OUT OF STOCK' : '⚠️ LOW STOCK THRESHOLD REACHED'}">
+            ALERT
+        </div>
+        <h1 th:text="${isCritical ? 'CRITICAL STOCK ALERT: OUT OF STOCK' : 'AUTOMATED LOW STOCK ALERT'}">
+            Low Stock Notification
+        </h1>
+        <p th:text="${isCritical ? 'Immediate procurement action required. Inventory level has dropped to zero.' : 'Inventory has fallen to or below the configured reorder threshold.'}">
+            Automated notification from inventory service.
+        </p>
+    </div>
+
+    <!-- Main Content -->
+    <div class="content">
+        <!-- Product Overview Card -->
+        <div class="summary-card">
+            <div class="product-title" th:text="${productName}">Product Name</div>
+            <div class="sku-tag">
+                SKU / Barcode: <strong style="color: #cbd5e1;" th:text="${sku}">SKU-00000</strong>
+            </div>
+        </div>
+
+        <!-- Metrics Table -->
+        <table class="metrics-grid">
+            <tr>
+                <th>Current Stock</th>
+                <td th:class="${isCritical} ? 'highlight-critical' : 'highlight-warning'">
+                    <span th:text="${currentStock}">0</span> units
+                    <span th:if="${isCritical}" style="font-size: 12px; color: #fca5a5; font-weight: normal; margin-left: 6px;">(EMPTY)</span>
+                </td>
+            </tr>
+            <tr>
+                <th>Minimum Stock Level</th>
+                <td><span th:text="${minimumLevel}">0</span> units</td>
+            </tr>
+            <tr>
+                <th>Suggested Reorder Quantity</th>
+                <td style="color: #60a5fa; font-weight: 700;">
+                    <span th:text="${suggestedReorder}">0</span> units
+                </td>
+            </tr>
+            <tr>
+                <th>Primary Supplier</th>
+                <td th:text="${supplier}">Standard Supplier</td>
+            </tr>
+            <tr>
+                <th>Category</th>
+                <td th:text="${category != null ? category : 'General'}">General</td>
+            </tr>
+            <tr>
+                <th>Trigger Source</th>
+                <td style="font-family: monospace; font-size: 12px; color: #a5b4fc;" th:text="${triggerReason}">POS_SALE</td>
+            </tr>
+            <tr>
+                <th>Alert Timestamp</th>
+                <td th:text="${timestamp}">2026-10-04 10:00:00</td>
+            </tr>
+        </table>
+
+        <!-- Suggested Reorder Box -->
+        <div class="reorder-box">
+            <div class="reorder-title">Procurement Recommendation</div>
+            <div class="reorder-val">
+                Reorder <span th:text="${suggestedReorder}">20</span> units
+            </div>
+            <p class="reorder-note">
+                Replenishing <span th:text="${suggestedReorder}">20</span> units will bring the product back above safe buffer levels. Please contact <strong th:text="${supplier}">supplier</strong> to issue a purchase order.
+            </p>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <p>This is an automated notification generated by the <strong>AI-Powered Hybrid Inventory Management System</strong>.</p>
+        <p>Event-Driven Alerting Engine &bull; Non-blocking transaction listener &bull; Dispatched via JavaMailSender</p>
+    </div>
+</div>
+</body>
+</html>
